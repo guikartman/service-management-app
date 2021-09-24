@@ -1,40 +1,40 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:services_controll_app/models/cellphone.model.dart';
 import 'package:services_controll_app/models/customer.model.dart';
 import 'package:services_controll_app/providers/customer.service.dart';
-import 'package:services_controll_app/utils/constants.dart';
-import 'package:services_controll_app/utils/functions_utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class NewCustomerPage extends StatefulWidget {
-  const NewCustomerPage({Key? key}) : super(key: key);
+class CustomerPage extends StatefulWidget {
+  final Customer customer;
+
+  const CustomerPage({Key? key, required this.customer}) : super(key: key);
 
   @override
-  _NewCustomerPageState createState() => _NewCustomerPageState();
+  _CustomerPageState createState() => _CustomerPageState();
 }
 
-class _NewCustomerPageState extends State<NewCustomerPage> {
-  Map<String, dynamic> _data = Map<String, dynamic>();
-  GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-  bool _isWhatsapp = false;
+class _CustomerPageState extends State<CustomerPage> {
+  bool? _isWhatsapp;
+
+  @override
+  void initState() {
+    super.initState();
+    _isWhatsapp = widget.customer.cellphone.isWhatsapp;
+  }
 
   @override
   Widget build(BuildContext context) {
-    CustomerService customerService = CustomerService();
+    final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+    final CustomerService customerService = CustomerService();
     return Scaffold(
         appBar: AppBar(
-          title: Text('NOVO CLIENTE'),
+          title: Text('Editar Cliente'),
           centerTitle: true,
           actions: [
             IconButton(
                 onPressed: () {
                   if (!_formkey.currentState!.validate()) return;
                   _formkey.currentState!.save();
-                  var newCustomer = retriveCustomerModel();
-                  customerService.createNewCustomer(context, newCustomer);
+                  widget.customer.cellphone.isWhatsapp = _isWhatsapp!;
+                  customerService.updateCustomer(context, widget.customer);
                 },
                 icon: Icon(Icons.save))
           ],
@@ -47,13 +47,15 @@ class _NewCustomerPageState extends State<NewCustomerPage> {
               children: [
                 TextFormField(
                   keyboardType: TextInputType.text,
+                  initialValue: widget.customer.name,
                   decoration: InputDecoration(labelText: 'Nome'),
                   validator: (value) {
                     if (value!.isEmpty) return 'Campo obrigatorio.';
                   },
-                  onSaved: (value) => _data['nome'] = value,
+                  onSaved: (value) => widget.customer.name = value!,
                 ),
                 TextFormField(
+                  initialValue: widget.customer.email,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(labelText: 'Email'),
                   validator: (value) {
@@ -62,9 +64,10 @@ class _NewCustomerPageState extends State<NewCustomerPage> {
                     if (!value.contains('.')) return 'E-mail ínvalido.';
                     if (value.length < 11) return 'E-mail ínvalido.';
                   },
-                  onSaved: (value) => _data['email'] = value,
+                  onSaved: (value) => widget.customer.email = value!,
                 ),
                 TextFormField(
+                  initialValue: '${widget.customer.cellphone.ddd}',
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(labelText: 'Código DDD Celular'),
                   validator: (value) {
@@ -75,9 +78,11 @@ class _NewCustomerPageState extends State<NewCustomerPage> {
                     if (int.parse(value) < 11 || int.parse(value) > 99)
                       return 'Código DDD inválido';
                   },
-                  onSaved: (value) => _data['celular-ddd'] = value,
+                  onSaved: (value) =>
+                      widget.customer.cellphone.ddd = int.parse(value!),
                 ),
                 TextFormField(
+                  initialValue: '${widget.customer.cellphone.cellphoneNumber}',
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(labelText: 'Número Celular'),
                   validator: (value) {
@@ -87,7 +92,8 @@ class _NewCustomerPageState extends State<NewCustomerPage> {
                     if (int.tryParse(value) == null)
                       return 'Somente números são aceitos.';
                   },
-                  onSaved: (value) => _data['celular'] = value,
+                  onSaved: (value) => widget
+                      .customer.cellphone.cellphoneNumber = int.parse(value!),
                 ),
                 Row(
                   children: [
@@ -128,8 +134,9 @@ class _NewCustomerPageState extends State<NewCustomerPage> {
                       onPressed: () {
                         if (!_formkey.currentState!.validate()) return;
                         _formkey.currentState!.save();
-                        var newCustomer = retriveCustomerModel();
-                        customerService.createNewCustomer(context, newCustomer);
+                        widget.customer.cellphone.isWhatsapp = _isWhatsapp!;
+                        customerService.updateCustomer(
+                            context, widget.customer);
                       },
                     ),
                   ),
@@ -138,15 +145,5 @@ class _NewCustomerPageState extends State<NewCustomerPage> {
             ),
           ),
         ));
-  }
-
-  Customer retriveCustomerModel() {
-    var cellphone = new Cellphone(
-        ddd: int.parse(_data['celular-ddd']),
-        cellphoneNumber: int.parse(_data['celular']),
-        isWhatsapp: _isWhatsapp);
-    var customer = new Customer(
-        email: _data['email'], name: _data['nome'], cellphone: cellphone);
-    return customer;
   }
 }

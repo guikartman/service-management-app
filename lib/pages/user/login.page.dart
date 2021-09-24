@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:services_controll_app/utils/constants.dart';
-import 'package:services_controll_app/utils/functions_utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+import 'package:services_controll_app/providers/user.service.dart';
 
 class LoginPage extends StatelessWidget {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final UserService userService = UserService();
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +83,7 @@ class LoginPage extends StatelessWidget {
                   onPressed: () {
                     final email = this.emailController.text;
                     final password = this.passwordController.text;
-                    logar(email, password, context);
+                    userService.logar(email, password, context);
                   },
                 ),
               ),
@@ -124,36 +122,6 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Future logar(
-      final String email, final String password, BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    final url = '${Constants.hostname}/oauth/token';
-    final response = await http.post(Uri.parse(url), headers: <String, String>{
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic Zmx1dHRlcjpGbGFtZW5nbw=='
-    }, body: <String, String>{
-      'username': email,
-      'password': password,
-      'grant_type': 'password'
-    });
-    if (response.statusCode == 200) {
-      final String responseString = response.body;
-
-      final token = getTokenByResponse(responseString);
-      await prefs.setString("token", token);
-      await FunctionsUtils.emailFromToken();
-      Navigator.of(context).pushNamed('/');
-    } else {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.error,
-          Colors.red,
-          'Usuário e/ou senha incorretos.',
-          'Desculpe, mas o usuário não pode ser validado!');
-    }
-  }
-
   Future<void> showMyConfirmDialog(
       final String email, BuildContext context) async {
     return showDialog<void>(
@@ -179,9 +147,9 @@ class LoginPage extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () => {
-                Navigator.pop(context, 'Confirm'),
-                retrievePassword(email, context)
+              onPressed: () {
+                Navigator.pop(context, 'Confirm');
+                userService.retrievePassword(email, context);
               },
               child: const Text('Confirm'),
             )
@@ -189,35 +157,5 @@ class LoginPage extends StatelessWidget {
         );
       },
     );
-  }
-
-  Future retrievePassword(final String email, BuildContext context) async {
-    final url = '${Constants.hostname}/users/retrieve-password?email=$email';
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 202) {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.email,
-          Colors.blue,
-          "Senha nova gerada",
-          "Sua senha foi gerada e encaminhada para o seu email.");
-    } else {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.error,
-          Colors.red,
-          "Error ao gerar senha",
-          "Ocorreu um erro ao gerar sua senha, verifique seus dados e tente novamente.");
-    }
-  }
-
-  String getTokenByResponse(String responseString) {
-    var firstIndex = responseString.indexOf('access_token');
-    var lastIndex = responseString.indexOf(',');
-    var accessToken = responseString.substring(firstIndex, lastIndex);
-    return accessToken
-        .substring(accessToken.indexOf(':'))
-        .replaceAll('"', '')
-        .replaceAll(':', '');
   }
 }

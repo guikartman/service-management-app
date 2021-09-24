@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:services_controll_app/models/customer.model.dart';
 import 'package:services_controll_app/models/user.model.dart';
+import 'package:services_controll_app/providers/customer.service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -43,18 +45,51 @@ class FunctionsUtils {
     );
   }
 
-  static Future<UserModel> getUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final email = prefs.get('email');
-    final token = prefs.get('token');
-    final url = '${Constants.hostname}/users/$email';
-    final response = await http.get(Uri.parse(url),
-        headers: <String, String>{"Authorization": "Bearer $token"});
-
-    if (response.statusCode == 200) {
-      return UserModel.fromJson(json.decode(response.body));
-    }
-    throw new Exception('Failed to get the user.');
+  static Future<void> showDeleateCustomerDialog(
+      BuildContext context,
+      IconData icon,
+      Color color,
+      String title,
+      String content,
+      Customer customer) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Container(
+            alignment: Alignment.center,
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: color,
+                  size: 18.0,
+                ),
+                Text(title,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold))
+              ],
+            ),
+          ),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Não'),
+            ),
+            TextButton(
+                onPressed: () {
+                  CustomerService().deleteCustomer(context, customer);
+                },
+                child: const Text('Sim'))
+          ],
+        );
+      },
+    );
   }
 
   static Future<void> emailFromToken() async {

@@ -1,16 +1,18 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/user.model.dart';
 import 'package:services_controll_app/pages/user/update_user.page.dart';
-import 'package:services_controll_app/utils/constants.dart';
+import 'package:services_controll_app/providers/user.service.dart';
 import 'package:services_controll_app/widgets/menu.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
-// ignore: must_be_immutable
-class UserPage extends StatelessWidget {
+class UserPage extends StatefulWidget {
+  @override
+  _UserPageState createState() => _UserPageState();
+}
+
+class _UserPageState extends State<UserPage> {
   var user;
+
+  final UserService userService = UserService();
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +24,17 @@ class UserPage extends StatelessWidget {
           IconButton(
               onPressed: () {
                 Navigator.push(
-                    (context),
-                    MaterialPageRoute(
-                        builder: (context) => UpdateUserPage(user: user)));
+                        (context),
+                        MaterialPageRoute(
+                            builder: (context) => UpdateUserPage(user: user)))
+                    .then((_) => setState(() {}));
               },
               icon: Icon(Icons.settings))
         ],
       ),
       drawer: Menu(),
       body: FutureBuilder<User>(
-        future: getUser(),
+        future: userService.getUser(),
         builder: (_, AsyncSnapshot<User> snapshot) {
           if (!snapshot.hasData)
             return Center(
@@ -75,19 +78,5 @@ class UserPage extends StatelessWidget {
         },
       ),
     );
-  }
-
-  Future<User> getUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final email = prefs.get('email');
-    final token = prefs.get('token');
-    final url = '${Constants.hostname}/users/$email';
-    final response = await http.get(Uri.parse(url),
-        headers: <String, String>{"Authorization": "Bearer $token"});
-
-    if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
-    }
-    throw new Exception('Failed to get the user.');
   }
 }

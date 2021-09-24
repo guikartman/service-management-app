@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/user.model.dart';
-import 'package:services_controll_app/utils/constants.dart';
-import 'package:services_controll_app/utils/functions_utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+import 'package:services_controll_app/providers/user.service.dart';
 
 import 'new_password.page.dart';
 
@@ -20,6 +17,8 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
   Map<String, dynamic> _data = Map<String, dynamic>();
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   User? user;
+
+  final UserService userService = UserService();
 
   @override
   void initState() {
@@ -38,13 +37,13 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
               onPressed: () {
                 _formKey.currentState!.save();
                 if (!_formKey.currentState!.validate()) return;
-                updateUserName(context, _data['name']);
+                userService.updateUserName(context, _data['name']);
               },
               icon: Icon(Icons.save))
         ],
       ),
       body: FutureBuilder<User>(
-        future: FunctionsUtils.getUser(),
+        future: userService.getUser(),
         builder: (_, AsyncSnapshot<User> snapshot) {
           if (!snapshot.hasData)
             return Center(
@@ -103,30 +102,5 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
         },
       ),
     );
-  }
-
-  Future updateUserName(BuildContext context, String userName) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.get('token');
-    final email = prefs.get('email');
-    var uri = '${Constants.hostname}/users/$email?name=$userName';
-    final response = await http.put(Uri.parse(uri),
-        headers: <String, String>{'Authorization': 'Bearer $token'});
-    if (response.statusCode == 202) {
-      FunctionsUtils.showMySimpleDialog(
-              context,
-              Icons.done,
-              Colors.green,
-              'Nome alterado com sucesso!',
-              'Seu nome foi alterado com sucesso.')
-          .then((value) => Navigator.of(context).pushNamed('/user'));
-    } else {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.error,
-          Colors.red,
-          'Error ao alterar o nome!',
-          'Algum error ocorreu ao tentar alterar seu nome!');
-    }
   }
 }

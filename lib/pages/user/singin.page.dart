@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:services_controll_app/utils/constants.dart';
-import 'package:services_controll_app/utils/functions_utils.dart';
+import 'package:services_controll_app/providers/user.service.dart';
 
 class SinginPage extends StatelessWidget {
   final emailController = TextEditingController();
@@ -11,6 +7,8 @@ class SinginPage extends StatelessWidget {
   final nameController = TextEditingController();
 
   final _formkey = GlobalKey<FormState>();
+
+  final UserService userService = UserService();
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +134,7 @@ class SinginPage extends StatelessWidget {
                           onPressed: () async {
                             var res = _formkey.currentState!.validate();
                             if (res) {
-                              singin(
+                              userService.createNewUser(
                                   context,
                                   nameController.text,
                                   emailController.text,
@@ -152,29 +150,5 @@ class SinginPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future singin(
-      BuildContext context, String name, String email, String password) async {
-    var uri = '${Constants.hostname}/users';
-    final response = await http.post(Uri.parse(uri),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, String>{
-          'name': name,
-          'email': email,
-          'password': password
-        }));
-    if (response.statusCode == 201) {
-      FunctionsUtils.showMySimpleDialog(context, Icons.create, Colors.green,
-              'Usuario criado com successo!', 'Valide no seu email.')
-          .then((value) => Navigator.of(context).pushNamed('/login'));
-    } else {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.error,
-          Colors.red,
-          'Error ao criar o usuário',
-          'Algum error ocorreu ao criar o usuário.');
-    }
   }
 }

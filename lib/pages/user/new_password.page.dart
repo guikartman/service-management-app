@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:services_controll_app/utils/constants.dart';
-import 'package:http/http.dart' as http;
-import 'package:services_controll_app/utils/functions_utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:services_controll_app/providers/user.service.dart';
 
 class NewPasswordPage extends StatefulWidget {
   const NewPasswordPage({Key? key}) : super(key: key);
@@ -14,6 +11,7 @@ class NewPasswordPage extends StatefulWidget {
 class _NewPasswordPageState extends State<NewPasswordPage> {
   Map<String, dynamic> _data = Map<String, dynamic>();
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final UserService userService = UserService();
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +77,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                       onPressed: () async {
                         _formKey.currentState!.save();
                         if (!_formKey.currentState!.validate()) return;
-                        changePassword(
+                        userService.changePassword(
                             context, _data['oldPass'], _data['newPass']);
                       },
                     ),
@@ -89,32 +87,5 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
             ),
           ),
         ));
-  }
-
-  Future changePassword(
-      BuildContext context, String oldPass, String newPass) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.get('token');
-    final email = prefs.get('email');
-    var uri =
-        '${Constants.hostname}/users/$email/change-password?oldPassword=$oldPass&newPassword=$newPass';
-    final response = await http.put(Uri.parse(uri),
-        headers: <String, String>{'Authorization': 'Bearer $token'});
-    if (response.statusCode == 202) {
-      FunctionsUtils.showMySimpleDialog(
-              context,
-              Icons.done,
-              Colors.green,
-              'Senha alterada com sucesso!',
-              'Sua senha foi alterada com sucesso.')
-          .then((value) => Navigator.of(context).pop());
-    } else {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.error,
-          Colors.red,
-          'Error ao alterar a senha!',
-          'Algum error ocorreu, verifique se a senha informada está correta.');
-    }
   }
 }
