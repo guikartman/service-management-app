@@ -61,7 +61,7 @@ class CustomerService {
         },
         body: json.encode(customer.toJson()));
 
-    Navigator.of(context).build(context);
+    Navigator.of(context).pushNamed('/clientes');
     if (response.statusCode == 204) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text("Cliente atualizado!"),

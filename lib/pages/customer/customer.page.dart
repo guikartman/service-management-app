@@ -1,40 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:services_controll_app/models/cellphone.model.dart';
 import 'package:services_controll_app/models/customer.model.dart';
 import 'package:services_controll_app/providers/customer.service.dart';
 
 class CustomerPage extends StatefulWidget {
-  final Customer customer;
+  CustomerPage({this.customer});
 
-  const CustomerPage({Key? key, required this.customer}) : super(key: key);
+  final Customer? customer;
 
   @override
   _CustomerPageState createState() => _CustomerPageState();
 }
 
 class _CustomerPageState extends State<CustomerPage> {
-  bool? _isWhatsapp;
+  late Map<String, dynamic> _data;
+  GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+  late bool _isWhatsapp;
 
   @override
   void initState() {
     super.initState();
-    _isWhatsapp = widget.customer.cellphone.isWhatsapp;
+    if (widget.customer != null) {
+      _data = widget.customer!.toJson();
+      _isWhatsapp = _data['cellphone'].isWhatsapp;
+    } else {
+      _data = Map<String, dynamic>();
+      _data['cellphone'] = Cellphone();
+      _isWhatsapp = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-    final CustomerService customerService = CustomerService();
+    CustomerService customerService = CustomerService();
     return Scaffold(
         appBar: AppBar(
-          title: Text('Editar Cliente'),
+          title: (widget.customer != null)
+              ? const Text('Editar Cliente')
+              : const Text('Cadastrar Cliente'),
           centerTitle: true,
           actions: [
             IconButton(
                 onPressed: () {
                   if (!_formkey.currentState!.validate()) return;
                   _formkey.currentState!.save();
-                  widget.customer.cellphone.isWhatsapp = _isWhatsapp!;
-                  customerService.updateCustomer(context, widget.customer);
+                  _data['cellphone'].isWhatsapp = _isWhatsapp;
+                  var customer = retriveCustomerModel();
+                  if (customer.id == null) {
+                    customerService.createNewCustomer(context, customer);
+                  } else {
+                    customerService.updateCustomer(context, customer);
+                  }
                 },
                 icon: Icon(Icons.save))
           ],
@@ -46,16 +62,18 @@ class _CustomerPageState extends State<CustomerPage> {
             child: ListView(
               children: [
                 TextFormField(
+                  initialValue:
+                      (_data.containsKey('name')) ? _data['name'] : '',
                   keyboardType: TextInputType.text,
-                  initialValue: widget.customer.name,
                   decoration: InputDecoration(labelText: 'Nome'),
                   validator: (value) {
                     if (value!.isEmpty) return 'Campo obrigatorio.';
                   },
-                  onSaved: (value) => widget.customer.name = value!,
+                  onSaved: (value) => _data['name'] = value,
                 ),
                 TextFormField(
-                  initialValue: widget.customer.email,
+                  initialValue:
+                      (_data.containsKey('email')) ? _data['email'] : '',
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(labelText: 'Email'),
                   validator: (value) {
@@ -64,10 +82,12 @@ class _CustomerPageState extends State<CustomerPage> {
                     if (!value.contains('.')) return 'E-mail ínvalido.';
                     if (value.length < 11) return 'E-mail ínvalido.';
                   },
-                  onSaved: (value) => widget.customer.email = value!,
+                  onSaved: (value) => _data['email'] = value,
                 ),
                 TextFormField(
-                  initialValue: '${widget.customer.cellphone.ddd}',
+                  initialValue: (_data['cellphone'].ddd != null)
+                      ? _data['cellphone'].ddd.toString()
+                      : '',
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(labelText: 'Código DDD Celular'),
                   validator: (value) {
@@ -78,11 +98,14 @@ class _CustomerPageState extends State<CustomerPage> {
                     if (int.parse(value) < 11 || int.parse(value) > 99)
                       return 'Código DDD inválido';
                   },
-                  onSaved: (value) =>
-                      widget.customer.cellphone.ddd = int.parse(value!),
+                  onSaved: (value) {
+                    _data['cellphone'].ddd = int.parse(value!);
+                  },
                 ),
                 TextFormField(
-                  initialValue: '${widget.customer.cellphone.cellphoneNumber}',
+                  initialValue: (_data['cellphone'].cellphoneNumber != null)
+                      ? _data['cellphone'].cellphoneNumber.toString()
+                      : '',
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(labelText: 'Número Celular'),
                   validator: (value) {
@@ -92,8 +115,9 @@ class _CustomerPageState extends State<CustomerPage> {
                     if (int.tryParse(value) == null)
                       return 'Somente números são aceitos.';
                   },
-                  onSaved: (value) => widget
-                      .customer.cellphone.cellphoneNumber = int.parse(value!),
+                  onSaved: (value) {
+                    _data['cellphone'].cellphoneNumber = int.parse(value!);
+                  },
                 ),
                 Row(
                   children: [
@@ -101,7 +125,7 @@ class _CustomerPageState extends State<CustomerPage> {
                       value: _isWhatsapp,
                       onChanged: (value) {
                         setState(() {
-                          _isWhatsapp = value!;
+                          _isWhatsapp = value as bool;
                         });
                       },
                     ),
@@ -134,9 +158,13 @@ class _CustomerPageState extends State<CustomerPage> {
                       onPressed: () {
                         if (!_formkey.currentState!.validate()) return;
                         _formkey.currentState!.save();
-                        widget.customer.cellphone.isWhatsapp = _isWhatsapp!;
-                        customerService.updateCustomer(
-                            context, widget.customer);
+                        _data['cellphone'].isWhatsapp = _isWhatsapp;
+                        var customer = retriveCustomerModel();
+                        if (customer.id == null) {
+                          customerService.createNewCustomer(context, customer);
+                        } else {
+                          customerService.updateCustomer(context, customer);
+                        }
                       },
                     ),
                   ),
@@ -145,5 +173,13 @@ class _CustomerPageState extends State<CustomerPage> {
             ),
           ),
         ));
+  }
+
+  Customer retriveCustomerModel() {
+    return Customer(
+        id: _data['id'],
+        email: _data['email'],
+        name: _data['name'],
+        cellphone: _data['cellphone']);
   }
 }

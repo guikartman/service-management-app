@@ -1,15 +1,15 @@
 class Cellphone {
   Cellphone({
     this.id,
-    required this.ddd,
-    required this.cellphoneNumber,
-    required this.isWhatsapp,
+    this.ddd,
+    this.cellphoneNumber,
+    this.isWhatsapp,
   });
 
   int? id;
-  int ddd;
-  int cellphoneNumber;
-  bool isWhatsapp;
+  int? ddd;
+  int? cellphoneNumber;
+  bool? isWhatsapp;
 
   factory Cellphone.fromJson(Map<String, dynamic> json) => Cellphone(
         id: json["id"],

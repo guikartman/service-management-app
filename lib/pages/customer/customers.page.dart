@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/customer.model.dart';
-import 'package:services_controll_app/pages/customer/new_customer.page.dart';
+import 'package:services_controll_app/pages/customer/customer.page.dart';
 import 'package:services_controll_app/providers/customer.service.dart';
 import 'package:services_controll_app/widgets/customer_tile.dart';
 import 'package:services_controll_app/widgets/menu.dart';
@@ -27,7 +27,7 @@ class _CustomersPageState extends State<CustomersPage> {
                   Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => NewCustomerPage()))
+                              builder: (context) => CustomerPage()))
                       .then((_) => setState(() {}));
                 },
                 icon: Icon(Icons.add))

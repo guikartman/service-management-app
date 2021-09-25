@@ -75,17 +75,41 @@ class FunctionsUtils {
           ),
           content: Text(content),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Não'),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5),
+                  )),
+              child: SizedBox(
+                child: TextButton(
+                    onPressed: () {
+                      CustomerService().deleteCustomer(context, customer);
+                    },
+                    child: const Text(
+                      'Sim',
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ),
             ),
-            TextButton(
-                onPressed: () {
-                  CustomerService().deleteCustomer(context, customer);
-                },
-                child: const Text('Sim'))
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5),
+                  )),
+              child: SizedBox(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Não',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
           ],
         );
       },
