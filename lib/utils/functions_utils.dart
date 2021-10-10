@@ -2,12 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/customer.model.dart';
-import 'package:services_controll_app/models/user.model.dart';
-import 'package:services_controll_app/providers/customer.service.dart';
+import 'package:services_controll_app/services/customer.service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-
-import 'constants.dart';
 
 class FunctionsUtils {
   static Future<void> showMySimpleDialog(BuildContext context, IconData icon,

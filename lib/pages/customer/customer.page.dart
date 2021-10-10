@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/cellphone.model.dart';
 import 'package:services_controll_app/models/customer.model.dart';
-import 'package:services_controll_app/providers/customer.service.dart';
+import 'package:services_controll_app/services/customer.service.dart';
 
 class CustomerPage extends StatefulWidget {
   CustomerPage({this.customer});

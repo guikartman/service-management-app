@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:services_controll_app/providers/user.service.dart';
+import 'package:services_controll_app/services/user.service.dart';
 
 class NewPasswordPage extends StatefulWidget {
   const NewPasswordPage({Key? key}) : super(key: key);

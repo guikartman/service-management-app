@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/user.model.dart';
-import 'package:services_controll_app/providers/user.service.dart';
+import 'package:services_controll_app/services/user.service.dart';
 
 import 'new_password.page.dart';
 

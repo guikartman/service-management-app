@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/user.model.dart';
 import 'package:services_controll_app/pages/user/update_user.page.dart';
-import 'package:services_controll_app/providers/user.service.dart';
+import 'package:services_controll_app/services/user.service.dart';
 import 'package:services_controll_app/widgets/menu.dart';
 
 class UserPage extends StatefulWidget {
