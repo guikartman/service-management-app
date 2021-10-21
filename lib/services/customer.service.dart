@@ -76,7 +76,7 @@ class CustomerService {
   Future deleteCustomer(BuildContext context, Customer customer) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.get('token');
-    final url = '${Constants.hostname}/customers?id=${customer.id}';
+    final url = '${Constants.hostname}/customers/${customer.id}';
     final response = await http.delete(Uri.parse(url),
         headers: <String, String>{'Authorization': 'Bearer $token'});
 

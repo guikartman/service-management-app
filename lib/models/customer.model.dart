@@ -25,4 +25,10 @@ class Customer {
         "name": name,
         "cellphone": cellphone,
       };
+
+  bool operator ==(dynamic other) =>
+      other != null && other is Customer && this.id == other.id;
+
+  @override
+  int get hashCode => super.hashCode;
 }

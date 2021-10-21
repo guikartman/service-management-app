@@ -29,7 +29,8 @@ class _InprogressOrdersTabState extends State<InprogressOrdersTab> {
         var inProgressOrders = allOrders
             .where((order) => (order.status == 'OPEN' &&
                 (order.startDate.isAtSameMomentAs(DateTime.now()) ||
-                    order.startDate.isAfter(DateTime.now()))))
+                    order.startDate.isBefore(DateTime.now()) &&
+                        (order.deliveryDate.isAfter(DateTime.now())))))
             .toList();
         return ListView.builder(
             itemCount: inProgressOrders.length,

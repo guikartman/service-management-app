@@ -16,45 +16,44 @@ class CustomerTile extends StatefulWidget {
 class _CustomerTileState extends State<CustomerTile> {
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      actionPane: SlidableDrawerActionPane(),
-      actionExtentRatio: 0.25,
-      child: ListTile(
-        leading: CircleAvatar(
-          child: Icon(Icons.person),
-        ),
-        title: Text(widget.customer.name),
-        subtitle: Text(widget.customer.email),
+    return ListTile(
+      leading: CircleAvatar(
+        child: Icon(Icons.person),
       ),
-      actions: [
-        IconSlideAction(
-          caption: 'Editar',
-          color: Colors.blue,
-          icon: Icons.edit,
-          onTap: () {
-            Navigator.push(
+      title: Text(widget.customer.name),
+      subtitle: Text(widget.customer.email),
+      trailing: Container(
+        width: 100,
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                CustomerPage(customer: widget.customer)))
+                    .then((_) => setState(() {}));
+              },
+              icon: Icon(Icons.edit),
+              color: Colors.orange,
+            ),
+            IconButton(
+              onPressed: () {
+                FunctionsUtils.showDeleteCustomerDialog(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            CustomerPage(customer: widget.customer)))
-                .then((_) => setState(() {}));
-          },
+                    Icons.delete,
+                    Colors.red,
+                    'Deseja deletar o cliente Id ${widget.customer.id}?',
+                    'Ao confirmar o cliente será definitivamente deletado!',
+                    widget.customer);
+              },
+              icon: Icon(Icons.delete),
+              color: Colors.red,
+            )
+          ],
         ),
-        IconSlideAction(
-          caption: 'Excluir',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: () {
-            FunctionsUtils.showDeleateCustomerDialog(
-                context,
-                Icons.delete,
-                Colors.red,
-                'Deseja deletar o cliente Id: ${widget.customer.id}?',
-                'Ao clicar no botão Sim o cliente será definitivamente deletado!',
-                widget.customer);
-          },
-        )
-      ],
+      ),
     );
   }
 }

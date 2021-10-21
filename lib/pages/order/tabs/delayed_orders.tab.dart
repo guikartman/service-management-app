@@ -27,8 +27,8 @@ class _DelayedOrdersTabState extends State<DelayedOrdersTab> {
 
         var allOrders = snapshot.data!;
         var delayedOrders = allOrders
-            .where((order) => (order.status != 'COMPLETED' &&
-                order.deliveryDate.isAfter(DateTime.now())))
+            .where((order) => (order.status == 'OPEN' &&
+                order.deliveryDate.isBefore(DateTime.now())))
             .toList();
         return ListView.builder(
             itemCount: delayedOrders.length,

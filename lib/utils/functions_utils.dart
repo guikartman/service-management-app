@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/customer.model.dart';
+import 'package:services_controll_app/models/order.model.dart';
 import 'package:services_controll_app/services/customer.service.dart';
+import 'package:services_controll_app/services/order.service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FunctionsUtils {
@@ -41,7 +43,7 @@ class FunctionsUtils {
     );
   }
 
-  static Future<void> showDeleateCustomerDialog(
+  static Future<void> showDeleteCustomerDialog(
       BuildContext context,
       IconData icon,
       Color color,
@@ -81,6 +83,72 @@ class FunctionsUtils {
                 child: TextButton(
                     onPressed: () {
                       CustomerService().deleteCustomer(context, customer);
+                    },
+                    child: const Text(
+                      'Sim',
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5),
+                  )),
+              child: SizedBox(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Não',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<void> showDeleteOrderDialog(BuildContext context, IconData icon,
+      Color color, String title, String content, Order order) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Container(
+            alignment: Alignment.center,
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: color,
+                  size: 18.0,
+                ),
+                Text(title,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold))
+              ],
+            ),
+          ),
+          content: Text(content),
+          actions: [
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5),
+                  )),
+              child: SizedBox(
+                child: TextButton(
+                    onPressed: () {
+                      OrderService().deleteOrder(context, order);
                     },
                     child: const Text(
                       'Sim',

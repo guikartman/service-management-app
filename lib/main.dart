@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:services_controll_app/routes.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
@@ -11,8 +10,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Services Management',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate
+      ],
+      supportedLocales: [const Locale('pt', 'BR')],
       initialRoute: '/login',
       routes: routes,
     );

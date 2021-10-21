@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
 import 'customer.model.dart';
@@ -12,12 +11,12 @@ String orderToJson(Order data) => json.encode(data.toJson());
 class Order {
   Order({
     this.id,
+    this.status,
     required this.title,
     required this.startDate,
     required this.deliveryDate,
     required this.description,
     required this.price,
-    required this.status,
     required this.isPayed,
     required this.customer,
   });
@@ -28,9 +27,11 @@ class Order {
   DateTime deliveryDate;
   String description;
   double price;
-  String status;
+  String? status;
   bool isPayed;
   Customer customer;
+
+  var dateFormat = DateFormat('dd/MM/yyyy');
 
   factory Order.fromJson(Map<String, dynamic> json) {
     var dateFormat = DateFormat('dd/MM/yyyy');
@@ -51,12 +52,12 @@ class Order {
   Map<String, dynamic> toJson() => {
         "id": id,
         "title": title,
-        "startDate": startDate,
-        "deliveryDate": deliveryDate,
+        "startDate": dateFormat.format(startDate),
+        "deliveryDate": dateFormat.format(deliveryDate),
         "description": description,
         "price": price,
         "status": status,
         "isPayed": isPayed,
-        "customer": customer.toJson(),
+        "customer": customer,
       };
 }

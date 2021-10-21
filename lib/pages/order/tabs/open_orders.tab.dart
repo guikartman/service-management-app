@@ -26,8 +26,10 @@ class _OpenOrdersTabState extends State<OpenOrdersTab> {
           );
 
         var allOrders = snapshot.data!;
-        var openOrders =
-            allOrders.where((order) => order.status == 'OPEN').toList();
+        var openOrders = allOrders
+            .where((order) => (order.status == 'OPEN' &&
+                order.startDate.isAfter(DateTime.now())))
+            .toList();
         return ListView.builder(
             itemCount: openOrders.length,
             itemBuilder: (BuildContext context, int index) {
