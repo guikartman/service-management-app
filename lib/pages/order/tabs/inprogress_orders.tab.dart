@@ -33,6 +33,7 @@ class _InprogressOrdersTabState extends State<InprogressOrdersTab> {
                         (order.deliveryDate.isAfter(DateTime.now())))))
             .toList();
         return ListView.builder(
+            padding: EdgeInsets.all(8),
             itemCount: inProgressOrders.length,
             itemBuilder: (BuildContext context, int index) {
               return OrderTitle(order: inProgressOrders[index]);

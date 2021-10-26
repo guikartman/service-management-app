@@ -1,10 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:services_controll_app/models/order.model.dart';
-import 'package:services_controll_app/pages/customer/customer.page.dart';
 import 'package:services_controll_app/pages/order/order.page.dart';
 import 'package:services_controll_app/pages/order/order_management.page.dart';
+import 'package:services_controll_app/utils/constants.dart';
 import 'package:services_controll_app/utils/functions_utils.dart';
 
 class OrderTitle extends StatefulWidget {
@@ -22,7 +22,17 @@ class _OrderTitleState extends State<OrderTitle> {
     var dateFormat = DateFormat('dd/MM/yyyy');
 
     return ListTile(
-      leading: filterIcon(),
+      leading: Container(
+          height: 100,
+          width: 80,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.blue,
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: filterImage()),
       title: Text(widget.order.title),
       subtitle: Text(
           'Data de entrega: ${dateFormat.format(widget.order.deliveryDate)}'),
@@ -46,8 +56,6 @@ class _OrderTitleState extends State<OrderTitle> {
               onPressed: () {
                 FunctionsUtils.showDeleteOrderDialog(
                     context,
-                    Icons.delete,
-                    Colors.red,
                     'Deseja deletar o serviço id ${widget.order.id}?',
                     'Ao confirma o serviço será definitivamente deletado!',
                     widget.order);
@@ -68,29 +76,16 @@ class _OrderTitleState extends State<OrderTitle> {
     );
   }
 
-  CircleAvatar filterIcon() {
-    if (widget.order.status == 'COMPLETED') {
-      return CircleAvatar(
-        child: Icon(Icons.check_circle_outline_rounded),
-        backgroundColor: Colors.green,
-      );
-    } else if (widget.order.status == 'OPEN' &&
-        widget.order.deliveryDate.isBefore(DateTime.now())) {
-      return CircleAvatar(
-        child: Icon(
-          Icons.access_time_filled,
+  filterImage() {
+    if (widget.order.imageUrl == null || widget.order.imageUrl!.isEmpty) {
+      return Icon(Icons.image);
+    } else {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: CachedNetworkImage(
+          imageUrl: '${Constants.imageGetStore}/${widget.order.imageUrl}/',
         ),
-        backgroundColor: Colors.red,
-      );
-    } else if (widget.order.status == 'OPEN' &&
-        (widget.order.startDate.isAfter(DateTime.now()))) {
-      return CircleAvatar(
-        child: Icon(Icons.home_repair_service),
-        backgroundColor: Colors.blueGrey,
       );
     }
-    return CircleAvatar(
-      child: Icon(Icons.home_repair_service),
-    );
   }
 }

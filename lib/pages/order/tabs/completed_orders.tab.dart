@@ -29,6 +29,7 @@ class _CompletedOrdersTabState extends State<CompletedOrdersTab> {
         var completedOrders =
             allOrders.where((order) => order.status == 'COMPLETED').toList();
         return ListView.builder(
+            padding: EdgeInsets.all(8),
             itemCount: completedOrders.length,
             itemBuilder: (BuildContext context, int index) {
               return OrderTitle(order: completedOrders[index]);

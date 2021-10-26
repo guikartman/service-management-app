@@ -31,6 +31,7 @@ class _OpenOrdersTabState extends State<OpenOrdersTab> {
                 order.startDate.isAfter(DateTime.now())))
             .toList();
         return ListView.builder(
+            padding: EdgeInsets.all(8),
             itemCount: openOrders.length,
             itemBuilder: (BuildContext context, int index) {
               return OrderTitle(order: openOrders[index]);

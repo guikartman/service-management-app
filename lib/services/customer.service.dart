@@ -87,7 +87,8 @@ class CustomerService {
       ));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text("Error ao deletar o cliente!"),
+        content: const Text(
+            "Error ao deletar o cliente, verifique se o cliente não possuí serviços atribuidos."),
       ));
     }
   }

@@ -18,6 +18,8 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   User? user;
 
+  bool _hasChanges = false;
+
   final UserService userService = UserService();
 
   @override
@@ -57,6 +59,35 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
           var user = snapshot.data;
           return Form(
             key: _formKey,
+            onWillPop: () {
+              if (_hasChanges) {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Existem alterações não salvas'),
+                        content: const Text('Deseja descartar as alterações?'),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Sim')),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Não'))
+                        ],
+                      );
+                    });
+                return Future.value(false);
+              }
+
+              return Future.value(true);
+            },
+            onChanged: () => _hasChanges = true,
             child: Center(
               child: Padding(
                   padding: const EdgeInsets.all(50.0),

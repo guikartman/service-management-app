@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:services_controll_app/models/customer.model.dart';
 import 'package:services_controll_app/pages/customer/customer.page.dart';
 import 'package:services_controll_app/utils/functions_utils.dart';
@@ -42,8 +41,6 @@ class _CustomerTileState extends State<CustomerTile> {
               onPressed: () {
                 FunctionsUtils.showDeleteCustomerDialog(
                     context,
-                    Icons.delete,
-                    Colors.red,
                     'Deseja deletar o cliente Id ${widget.customer.id}?',
                     'Ao confirmar o cliente será definitivamente deletado!',
                     widget.customer);

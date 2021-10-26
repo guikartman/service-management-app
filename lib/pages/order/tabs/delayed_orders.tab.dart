@@ -31,6 +31,7 @@ class _DelayedOrdersTabState extends State<DelayedOrdersTab> {
                 order.deliveryDate.isBefore(DateTime.now())))
             .toList();
         return ListView.builder(
+            padding: EdgeInsets.all(8),
             itemCount: delayedOrders.length,
             itemBuilder: (BuildContext context, int index) {
               return OrderTitle(order: delayedOrders[index]);

@@ -45,8 +45,6 @@ class UserService {
     } else {
       FunctionsUtils.showMySimpleDialog(
           context,
-          Icons.error,
-          Colors.red,
           'Usuário e/ou senha incorretos.',
           'Desculpe, mas o usuário não pode ser validado!');
     }
@@ -63,15 +61,11 @@ class UserService {
           'password': password
         }));
     if (response.statusCode == 201) {
-      FunctionsUtils.showMySimpleDialog(context, Icons.done, Colors.green,
-              'Usuario criado com successo!', 'Valide no seu email.')
+      FunctionsUtils.showMySimpleDialog(
+              context, 'Usuario criado com successo!', 'Valide no seu email.')
           .then((value) => Navigator.of(context).pushNamed('/login'));
     } else {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.error,
-          Colors.red,
-          'Error ao criar o usuário',
+      FunctionsUtils.showMySimpleDialog(context, 'Error ao criar o usuário',
           'Algum error ocorreu ao criar o usuário.');
     }
   }
@@ -100,18 +94,10 @@ class UserService {
     final url = '${Constants.hostname}/users/retrieve-password?email=$email';
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 202) {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.email,
-          Colors.blue,
-          "Senha nova gerada",
+      FunctionsUtils.showMySimpleDialog(context, "Senha nova gerada",
           "Sua senha foi gerada e encaminhada para o seu email.");
     } else {
-      FunctionsUtils.showMySimpleDialog(
-          context,
-          Icons.error,
-          Colors.red,
-          "Error ao gerar senha",
+      FunctionsUtils.showMySimpleDialog(context, "Error ao gerar senha",
           "Ocorreu um erro ao gerar sua senha, verifique seus dados e tente novamente.");
     }
   }

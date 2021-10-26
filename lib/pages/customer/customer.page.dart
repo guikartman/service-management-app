@@ -17,6 +17,8 @@ class _CustomerPageState extends State<CustomerPage> {
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   late bool _isWhatsapp;
 
+  bool _hasChanges = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +59,35 @@ class _CustomerPageState extends State<CustomerPage> {
         ),
         body: Form(
           key: _formkey,
+          onWillPop: () {
+            if (_hasChanges) {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Existem alterações não salvas'),
+                      content: const Text('Deseja descartar as alterações?'),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Sim')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Não'))
+                      ],
+                    );
+                  });
+              return Future.value(false);
+            }
+
+            return Future.value(true);
+          },
+          onChanged: () => _hasChanges = true,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: ListView(
@@ -124,6 +155,7 @@ class _CustomerPageState extends State<CustomerPage> {
                     Checkbox(
                       value: _isWhatsapp,
                       onChanged: (value) {
+                        _hasChanges = true;
                         setState(() {
                           _isWhatsapp = value as bool;
                         });

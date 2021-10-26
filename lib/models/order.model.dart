@@ -12,6 +12,7 @@ class Order {
   Order({
     this.id,
     this.status,
+    this.imageUrl,
     required this.title,
     required this.startDate,
     required this.deliveryDate,
@@ -29,6 +30,7 @@ class Order {
   double price;
   String? status;
   bool isPayed;
+  String? imageUrl;
   Customer customer;
 
   var dateFormat = DateFormat('dd/MM/yyyy');
@@ -45,6 +47,7 @@ class Order {
       price: json["price"].toDouble(),
       status: json["status"],
       isPayed: json["isPayed"],
+      imageUrl: json["imageUrl"],
       customer: Customer.fromJson(json["customer"]),
     );
   }
@@ -58,6 +61,7 @@ class Order {
         "price": price,
         "status": status,
         "isPayed": isPayed,
+        "imageUrl": imageUrl,
         "customer": customer,
       };
 }

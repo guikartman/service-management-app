@@ -8,8 +8,8 @@ import 'package:services_controll_app/services/order.service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FunctionsUtils {
-  static Future<void> showMySimpleDialog(BuildContext context, IconData icon,
-      Color color, String title, String content) async {
+  static Future<void> showMySimpleDialog(
+      BuildContext context, String title, String content) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -18,11 +18,6 @@ class FunctionsUtils {
             alignment: Alignment.center,
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: color,
-                  size: 18.0,
-                ),
                 Text(title,
                     style: TextStyle(
                         color: Colors.black,
@@ -43,13 +38,8 @@ class FunctionsUtils {
     );
   }
 
-  static Future<void> showDeleteCustomerDialog(
-      BuildContext context,
-      IconData icon,
-      Color color,
-      String title,
-      String content,
-      Customer customer) async {
+  static Future<void> showDeleteCustomerDialog(BuildContext context,
+      String title, String content, Customer customer) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -58,11 +48,6 @@ class FunctionsUtils {
             alignment: Alignment.center,
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: color,
-                  size: 18.0,
-                ),
                 Text(title,
                     style: TextStyle(
                         color: Colors.black,
@@ -73,39 +58,19 @@ class FunctionsUtils {
           ),
           content: Text(content),
           actions: [
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(5),
-                  )),
-              child: SizedBox(
-                child: TextButton(
-                    onPressed: () {
-                      CustomerService().deleteCustomer(context, customer);
-                    },
-                    child: const Text(
-                      'Sim',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(5),
-                  )),
-              child: SizedBox(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Não',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+            TextButton(
+                onPressed: () {
+                  CustomerService().deleteCustomer(context, customer);
+                },
+                child: const Text(
+                  'Sim',
+                )),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Não',
               ),
             ),
           ],
@@ -114,8 +79,8 @@ class FunctionsUtils {
     );
   }
 
-  static Future<void> showDeleteOrderDialog(BuildContext context, IconData icon,
-      Color color, String title, String content, Order order) async {
+  static Future<void> showDeleteOrderDialog(
+      BuildContext context, String title, String content, Order order) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -124,11 +89,6 @@ class FunctionsUtils {
             alignment: Alignment.center,
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: color,
-                  size: 18.0,
-                ),
                 Text(title,
                     style: TextStyle(
                         color: Colors.black,
@@ -139,39 +99,19 @@ class FunctionsUtils {
           ),
           content: Text(content),
           actions: [
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(5),
-                  )),
-              child: SizedBox(
-                child: TextButton(
-                    onPressed: () {
-                      OrderService().deleteOrder(context, order);
-                    },
-                    child: const Text(
-                      'Sim',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(5),
-                  )),
-              child: SizedBox(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Não',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+            TextButton(
+                onPressed: () {
+                  OrderService().deleteOrder(context, order);
+                },
+                child: const Text(
+                  'Sim',
+                )),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Não',
               ),
             ),
           ],

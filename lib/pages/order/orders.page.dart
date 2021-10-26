@@ -61,7 +61,7 @@ class _OrdersPageState extends State<OrdersPage>
             tabs: [
               Tab(
                 icon: Icon(Icons.home_repair_service),
-                text: 'Abertos',
+                text: 'Aberto',
               ),
               Tab(
                 icon: Icon(Icons.build_circle),
@@ -69,11 +69,11 @@ class _OrdersPageState extends State<OrdersPage>
               ),
               Tab(
                 icon: Icon(Icons.access_time_filled),
-                text: 'Atrasados',
+                text: 'Atrasado',
               ),
               Tab(
                 icon: Icon(Icons.check_circle_outline_rounded),
-                text: 'Completos',
+                text: 'Completo',
               ),
             ],
             controller: controller,

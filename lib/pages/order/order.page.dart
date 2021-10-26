@@ -1,12 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import 'package:services_controll_app/models/customer.model.dart';
 import 'package:services_controll_app/models/order.model.dart';
 import 'package:services_controll_app/services/customer.service.dart';
 import 'package:services_controll_app/services/order.service.dart';
+import 'package:services_controll_app/utils/constants.dart';
 import 'package:services_controll_app/utils/currency_formatter.dart';
+import 'package:http/http.dart' as http;
 
 class OrderPage extends StatefulWidget {
   OrderPage({this.order});
@@ -28,6 +33,9 @@ class _OrderPageState extends State<OrderPage> {
   late bool _isPayed;
   late DateTime _startDate;
   late DateTime _deliveryDate;
+
+  bool _hasChanges = false;
+  bool _loading = false;
 
   @override
   void initState() {
@@ -104,6 +112,37 @@ class _OrderPageState extends State<OrderPage> {
               this._customers = snapshot.data!;
               return Form(
                   key: _formkey,
+                  onWillPop: () {
+                    if (_hasChanges) {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title:
+                                  const Text('Existem alterações não salvas'),
+                              content:
+                                  const Text('Deseja descartar as alterações?'),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Sim')),
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Não'))
+                              ],
+                            );
+                          });
+                      return Future.value(false);
+                    }
+
+                    return Future.value(true);
+                  },
+                  onChanged: () => _hasChanges = true,
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: ListView(
@@ -150,6 +189,7 @@ class _OrderPageState extends State<OrderPage> {
                           value: _data['customer'],
                           decoration: InputDecoration(labelText: 'Cliente'),
                           onChanged: (value) {
+                            _hasChanges = true;
                             setState(() {
                               _data['customer'] = value as Customer;
                             });
@@ -177,6 +217,9 @@ class _OrderPageState extends State<OrderPage> {
                                     lastDate:
                                         DateTime.now().add(Duration(days: 365)),
                                   ).then((value) {
+                                    if (value != null) {
+                                      _hasChanges = true;
+                                    }
                                     setState(() {
                                       _startDate = value!;
                                     });
@@ -198,6 +241,9 @@ class _OrderPageState extends State<OrderPage> {
                                     lastDate:
                                         DateTime.now().add(Duration(days: 365)),
                                   ).then((value) {
+                                    if (value != null) {
+                                      _hasChanges = true;
+                                    }
                                     setState(() {
                                       _deliveryDate = value!;
                                     });
@@ -213,6 +259,7 @@ class _OrderPageState extends State<OrderPage> {
                             Checkbox(
                               value: _isPayed,
                               onChanged: (value) {
+                                _hasChanges = true;
                                 setState(() {
                                   _isPayed = value as bool;
                                 });
@@ -223,6 +270,30 @@ class _OrderPageState extends State<OrderPage> {
                               style: TextStyle(fontSize: 17),
                             )
                           ],
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          height: 60,
+                          alignment: Alignment.centerLeft,
+                          decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(5),
+                              )),
+                          child: SizedBox.expand(
+                            child: TextButton(
+                              child: Text(
+                                '${(widget.order!.imageUrl == null || widget.order!.imageUrl!.isEmpty) ? "Adicionar Imagem" : "Atualizar Imagem"}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              onPressed: () => getGallery(),
+                            ),
+                          ),
                         ),
                         SizedBox(
                           height: 15,
@@ -266,6 +337,39 @@ class _OrderPageState extends State<OrderPage> {
             }));
   }
 
+  getGallery() async {
+    var fileName = await ImagePicker().pickImage(source: ImageSource.gallery);
+    upload(fileName!);
+  }
+
+  upload(XFile imageFile) async {
+    setState(() {
+      _loading = true;
+    });
+    var stream = http.ByteStream(Stream.castFrom(imageFile.openRead()));
+    var length = await imageFile.length();
+    var uri = Uri.parse(Constants.imageStoreUri);
+
+    var request = http.MultipartRequest('POST', uri);
+    var multipartFile = http.MultipartFile('uploadedfile', stream, length,
+        filename: imageFile.path);
+
+    request.files.add(multipartFile);
+    request.fields.addAll({'UPLOADCARE_PUB_KEY': '48e1ce64eb9cddbefe3a'});
+
+    var response = await request.send();
+    response.stream.transform(utf8.decoder).listen((event) {
+      final JsonDecoder decoder = JsonDecoder();
+      dynamic map = decoder.convert(event);
+
+      setState(() {
+        _data['imageUrl'] = map['uploadedfile'];
+        _hasChanges = true;
+        _loading = false;
+      });
+    });
+  }
+
   Order retriveOrderModel() {
     return Order(
         id: _data['id'],
@@ -276,6 +380,7 @@ class _OrderPageState extends State<OrderPage> {
         price: _data['price'],
         isPayed: _data['isPayed'],
         status: _data['status'],
-        customer: _data['customer']);
+        customer: _data['customer'],
+        imageUrl: _data['imageUrl']);
   }
 }
