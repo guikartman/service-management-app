@@ -5,6 +5,7 @@ import 'package:services_controll_app/models/order.model.dart';
 import 'package:services_controll_app/pages/customer/customer.page.dart';
 import 'package:services_controll_app/services/order.service.dart';
 import 'package:services_controll_app/utils/constants.dart';
+import 'package:services_controll_app/widgets/detail_image.dart';
 
 class OrderManagement extends StatefulWidget {
   final Order order;
@@ -18,6 +19,7 @@ class OrderManagement extends StatefulWidget {
 class _OrderManagementState extends State<OrderManagement> {
   @override
   Widget build(BuildContext context) {
+    final imageUrl = '${Constants.imageGetStore}/${widget.order.imageUrl}/';
     var dateFormater = DateFormat('dd/MM/yyyy');
     var numberFormater = NumberFormat('###.00', 'en_US');
     var orderService = OrderService();
@@ -50,7 +52,23 @@ class _OrderManagementState extends State<OrderManagement> {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: buildImage()),
+                    child: GestureDetector(
+                      child: Hero(
+                        tag: 'openImage',
+                        child: buildImage(imageUrl),
+                      ),
+                      onTap: () {
+                        if (widget.order.imageUrl != null &&
+                            widget.order.imageUrl!.isNotEmpty) {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (_) {
+                            return DetailScreen(
+                              imageUrl: imageUrl,
+                            );
+                          }));
+                        }
+                      },
+                    )),
                 SizedBox(
                   height: 15,
                 ),
@@ -179,7 +197,7 @@ class _OrderManagementState extends State<OrderManagement> {
     );
   }
 
-  buildImage() {
+  buildImage(String imageUrl) {
     if (widget.order.imageUrl == null || widget.order.imageUrl!.isEmpty) {
       return Center(
         child: Text('Numhuma imagem anexada'),
@@ -188,7 +206,7 @@ class _OrderManagementState extends State<OrderManagement> {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: CachedNetworkImage(
-          imageUrl: '${Constants.imageGetStore}/${widget.order.imageUrl}/',
+          imageUrl: imageUrl,
         ),
       );
     }
