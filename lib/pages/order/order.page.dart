@@ -35,7 +35,6 @@ class _OrderPageState extends State<OrderPage> {
   late DateTime _deliveryDate;
 
   bool _hasChanges = false;
-  bool _loading = false;
 
   @override
   void initState() {
@@ -343,9 +342,6 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   upload(XFile imageFile) async {
-    setState(() {
-      _loading = true;
-    });
     var stream = http.ByteStream(Stream.castFrom(imageFile.openRead()));
     var length = await imageFile.length();
     var uri = Uri.parse(Constants.imageStoreUri);
@@ -365,7 +361,6 @@ class _OrderPageState extends State<OrderPage> {
       setState(() {
         _data['imageUrl'] = map['uploadedfile'];
         _hasChanges = true;
-        _loading = false;
       });
     });
   }
