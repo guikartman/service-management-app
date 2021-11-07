@@ -18,6 +18,7 @@ class _CustomerPageState extends State<CustomerPage> {
   late bool _isWhatsapp;
 
   bool _hasChanges = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -48,6 +49,9 @@ class _CustomerPageState extends State<CustomerPage> {
                   _formkey.currentState!.save();
                   _data['cellphone'].isWhatsapp = _isWhatsapp;
                   var customer = retriveCustomerModel();
+                  setState(() {
+                    _isSaving = true;
+                  });
                   if (customer.id == null) {
                     customerService.createNewCustomer(context, customer);
                   } else {
@@ -57,154 +61,168 @@ class _CustomerPageState extends State<CustomerPage> {
                 icon: Icon(Icons.save))
           ],
         ),
-        body: Form(
-          key: _formkey,
-          onWillPop: () {
-            if (_hasChanges) {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Existem alterações não salvas'),
-                      content: const Text('Deseja descartar as alterações?'),
-                      actions: [
-                        TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Sim')),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Não'))
-                      ],
-                    );
-                  });
-              return Future.value(false);
-            }
-
-            return Future.value(true);
-          },
-          onChanged: () => _hasChanges = true,
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: ListView(
-              children: [
-                TextFormField(
-                  initialValue:
-                      (_data.containsKey('name')) ? _data['name'] : '',
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(labelText: 'Nome'),
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Campo obrigatorio.';
-                  },
-                  onSaved: (value) => _data['name'] = value,
-                ),
-                TextFormField(
-                  initialValue:
-                      (_data.containsKey('email')) ? _data['email'] : '',
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(labelText: 'Email'),
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Campo obrigatorio';
-                    if (!value.contains('@')) return 'E-mail ínvalido.';
-                    if (!value.contains('.')) return 'E-mail ínvalido.';
-                    if (value.length < 11) return 'E-mail ínvalido.';
-                  },
-                  onSaved: (value) => _data['email'] = value,
-                ),
-                TextFormField(
-                  initialValue: (_data['cellphone'].ddd != null)
-                      ? _data['cellphone'].ddd.toString()
-                      : '',
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(labelText: 'Código DDD Celular'),
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Campo obrigatorio';
-                    if (value.length != 2) return 'Código DDD inválido.';
-                    if (int.tryParse(value) == null)
-                      return 'Somente números são aceitos';
-                    if (int.parse(value) < 11 || int.parse(value) > 99)
-                      return 'Código DDD inválido';
-                  },
-                  onSaved: (value) {
-                    _data['cellphone'].ddd = int.parse(value!);
-                  },
-                ),
-                TextFormField(
-                  initialValue: (_data['cellphone'].cellphoneNumber != null)
-                      ? _data['cellphone'].cellphoneNumber.toString()
-                      : '',
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(labelText: 'Número Celular'),
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Campo obrigatorio';
-                    if (value.length < 8 || value.length > 9)
-                      return 'Número de celular inválido.';
-                    if (int.tryParse(value) == null)
-                      return 'Somente números são aceitos.';
-                  },
-                  onSaved: (value) {
-                    _data['cellphone'].cellphoneNumber = int.parse(value!);
-                  },
-                ),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _isWhatsapp,
-                      onChanged: (value) {
-                        _hasChanges = true;
-                        setState(() {
-                          _isWhatsapp = value as bool;
+        body: _isSaving
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : Form(
+                key: _formkey,
+                onWillPop: () {
+                  if (_hasChanges) {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Existem alterações não salvas'),
+                            content:
+                                const Text('Deseja descartar as alterações?'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Sim')),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Não'))
+                            ],
+                          );
                         });
-                      },
-                    ),
-                    const Text(
-                      'Whatsapp',
-                      style: TextStyle(fontSize: 17),
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  height: 60,
-                  alignment: Alignment.centerLeft,
-                  decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(5),
-                      )),
-                  child: SizedBox.expand(
-                    child: TextButton(
-                      child: Text(
-                        "Salvar",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+                    return Future.value(false);
+                  }
+
+                  return Future.value(true);
+                },
+                onChanged: () => _hasChanges = true,
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ListView(
+                    children: [
+                      TextFormField(
+                        initialValue:
+                            (_data.containsKey('name')) ? _data['name'] : '',
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(labelText: 'Nome'),
+                        validator: (value) {
+                          if (value!.isEmpty) return 'Campo obrigatorio.';
+                        },
+                        onSaved: (value) => _data['name'] = value,
+                      ),
+                      TextFormField(
+                        initialValue:
+                            (_data.containsKey('email')) ? _data['email'] : '',
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(labelText: 'Email'),
+                        validator: (value) {
+                          if (value!.isEmpty) return 'Campo obrigatorio';
+                          if (!value.contains('@')) return 'E-mail ínvalido.';
+                          if (!value.contains('.')) return 'E-mail ínvalido.';
+                          if (value.length < 11) return 'E-mail ínvalido.';
+                        },
+                        onSaved: (value) => _data['email'] = value,
+                      ),
+                      TextFormField(
+                        initialValue: (_data['cellphone'].ddd != null)
+                            ? _data['cellphone'].ddd.toString()
+                            : '',
+                        keyboardType: TextInputType.number,
+                        decoration:
+                            InputDecoration(labelText: 'Código DDD Celular'),
+                        validator: (value) {
+                          if (value!.isEmpty) return 'Campo obrigatorio';
+                          if (value.length != 2) return 'Código DDD inválido.';
+                          if (int.tryParse(value) == null)
+                            return 'Somente números são aceitos';
+                          if (int.parse(value) < 11 || int.parse(value) > 99)
+                            return 'Código DDD inválido';
+                        },
+                        onSaved: (value) {
+                          _data['cellphone'].ddd = int.parse(value!);
+                        },
+                      ),
+                      TextFormField(
+                        initialValue:
+                            (_data['cellphone'].cellphoneNumber != null)
+                                ? _data['cellphone'].cellphoneNumber.toString()
+                                : '',
+                        keyboardType: TextInputType.phone,
+                        decoration:
+                            InputDecoration(labelText: 'Número Celular'),
+                        validator: (value) {
+                          if (value!.isEmpty) return 'Campo obrigatorio';
+                          if (value.length < 8 || value.length > 9)
+                            return 'Número de celular inválido.';
+                          if (int.tryParse(value) == null)
+                            return 'Somente números são aceitos.';
+                        },
+                        onSaved: (value) {
+                          _data['cellphone'].cellphoneNumber =
+                              int.parse(value!);
+                        },
+                      ),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _isWhatsapp,
+                            onChanged: (value) {
+                              _hasChanges = true;
+                              setState(() {
+                                _isWhatsapp = value as bool;
+                              });
+                            },
+                          ),
+                          const Text(
+                            'Whatsapp',
+                            style: TextStyle(fontSize: 17),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        height: 60,
+                        alignment: Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(5),
+                            )),
+                        child: SizedBox.expand(
+                          child: TextButton(
+                            child: Text(
+                              "Salvar",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                            onPressed: () {
+                              if (!_formkey.currentState!.validate()) return;
+                              _formkey.currentState!.save();
+                              _data['cellphone'].isWhatsapp = _isWhatsapp;
+                              var customer = retriveCustomerModel();
+                              setState(() {
+                                _isSaving = true;
+                              });
+                              if (customer.id == null) {
+                                customerService.createNewCustomer(
+                                    context, customer);
+                              } else {
+                                customerService.updateCustomer(
+                                    context, customer);
+                              }
+                            },
+                          ),
                         ),
                       ),
-                      onPressed: () {
-                        if (!_formkey.currentState!.validate()) return;
-                        _formkey.currentState!.save();
-                        _data['cellphone'].isWhatsapp = _isWhatsapp;
-                        var customer = retriveCustomerModel();
-                        if (customer.id == null) {
-                          customerService.createNewCustomer(context, customer);
-                        } else {
-                          customerService.updateCustomer(context, customer);
-                        }
-                      },
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ));
+              ));
   }
 
   Customer retriveCustomerModel() {

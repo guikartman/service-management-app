@@ -19,7 +19,6 @@ class OrderManagement extends StatefulWidget {
 class _OrderManagementState extends State<OrderManagement> {
   @override
   Widget build(BuildContext context) {
-    final imageUrl = '${Constants.imageGetStore}/${widget.order.imageUrl}/';
     var dateFormater = DateFormat('dd/MM/yyyy');
     var numberFormater = NumberFormat('###.00', 'en_US');
     var orderService = OrderService();
@@ -55,7 +54,7 @@ class _OrderManagementState extends State<OrderManagement> {
                     child: GestureDetector(
                       child: Hero(
                         tag: 'openImage',
-                        child: buildImage(imageUrl),
+                        child: buildImage(widget.order.imageUrl),
                       ),
                       onTap: () {
                         if (widget.order.imageUrl != null &&
@@ -63,7 +62,7 @@ class _OrderManagementState extends State<OrderManagement> {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (_) {
                             return DetailScreen(
-                              imageUrl: imageUrl,
+                              imageUrl: widget.order.imageUrl!,
                             );
                           }));
                         }
@@ -137,10 +136,59 @@ class _OrderManagementState extends State<OrderManagement> {
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
                 SizedBox(
-                  height: 30,
+                  height: 20,
                 ),
                 Container(
-                  height: 60,
+                  height: 50,
+                  alignment: Alignment.centerLeft,
+                  decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(5),
+                      )),
+                  child: SizedBox.expand(
+                    child: TextButton(
+                      child: Text(
+                        "${(widget.order.isPayed) ? 'Marcar Não Pago' : 'Marca Pago'}",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text(
+                                    '${(widget.order.isPayed) ? "Marcar Não Pago" : "Marca Pago"}'),
+                                content: Text(
+                                    'Deseja marcar o serviço como ${(widget.order.isPayed) ? "Não Pago" : "Pago"}?'),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        orderService.updatePayedSatus(
+                                            context, widget.order.id!);
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Sim')),
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Não'))
+                                ],
+                              );
+                            });
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  height: 50,
                   alignment: Alignment.centerLeft,
                   decoration: BoxDecoration(
                       color: Colors.blue,
@@ -197,7 +245,7 @@ class _OrderManagementState extends State<OrderManagement> {
     );
   }
 
-  buildImage(String imageUrl) {
+  buildImage(String? imageUrl) {
     if (widget.order.imageUrl == null || widget.order.imageUrl!.isEmpty) {
       return Center(
         child: Text('Numhuma imagem anexada'),
@@ -206,7 +254,7 @@ class _OrderManagementState extends State<OrderManagement> {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: CachedNetworkImage(
-          imageUrl: imageUrl,
+          imageUrl: imageUrl!,
         ),
       );
     }

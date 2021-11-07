@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,6 +10,7 @@ import 'package:services_controll_app/services/order.service.dart';
 import 'package:services_controll_app/utils/constants.dart';
 import 'package:services_controll_app/utils/currency_formatter.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderPage extends StatefulWidget {
   OrderPage({this.order});
@@ -35,6 +34,7 @@ class _OrderPageState extends State<OrderPage> {
   late DateTime _deliveryDate;
 
   bool _hasChanges = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -88,6 +88,9 @@ class _OrderPageState extends State<OrderPage> {
                   _data['deliveryDate'] = _deliveryDate;
                   _data['startDate'] = _startDate;
                   var order = retriveOrderModel();
+                  setState(() {
+                    _isSaving = true;
+                  });
                   if (order.id == null) {
                     orderService.createNewOrder(context, order);
                   } else {
@@ -109,260 +112,267 @@ class _OrderPageState extends State<OrderPage> {
                   child: Text(snapshot.error.toString()),
                 );
               this._customers = snapshot.data!;
-              return Form(
-                  key: _formkey,
-                  onWillPop: () {
-                    if (_hasChanges) {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title:
-                                  const Text('Existem alterações não salvas'),
-                              content:
-                                  const Text('Deseja descartar as alterações?'),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Sim')),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Não'))
-                              ],
-                            );
-                          });
-                      return Future.value(false);
-                    }
+              return _isSaving
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : Form(
+                      key: _formkey,
+                      onWillPop: () {
+                        if (_hasChanges) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text(
+                                      'Existem alterações não salvas'),
+                                  content: const Text(
+                                      'Deseja descartar as alterações?'),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Sim')),
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Não'))
+                                  ],
+                                );
+                              });
+                          return Future.value(false);
+                        }
 
-                    return Future.value(true);
-                  },
-                  onChanged: () => _hasChanges = true,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: ListView(
-                      children: [
-                        TextFormField(
-                          initialValue: (_data.containsKey('title'))
-                              ? _data['title']
-                              : '',
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(labelText: 'Titulo'),
-                          validator: (value) {
-                            if (value!.isEmpty) return 'Campo obrigatorio.';
-                          },
-                          onSaved: (value) => _data['title'] = value,
-                        ),
-                        TextFormField(
-                          initialValue: (_data.containsKey('description'))
-                              ? _data['description']
-                              : '',
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(labelText: 'Descrição'),
-                          validator: (value) {
-                            if (value!.isEmpty) return 'Campo obrigatorio';
-                          },
-                          onSaved: (value) => _data['description'] = value,
-                        ),
-                        TextFormField(
-                          initialValue: (_data.containsKey('price'))
-                              ? (numberFormat.format(_data['price']))
-                              : '',
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(labelText: 'Preço'),
-                          validator: (value) {
-                            if (value!.isEmpty) return 'Campo obrigatorio';
-                          },
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            CurrencyInputFormatter()
-                          ],
-                          onSaved: (value) =>
-                              _data['price'] = double.parse(value!),
-                        ),
-                        DropdownButtonFormField(
-                          value: _data['customer'],
-                          decoration: InputDecoration(labelText: 'Cliente'),
-                          onChanged: (value) {
-                            _hasChanges = true;
-                            setState(() {
-                              _data['customer'] = value as Customer;
-                            });
-                          },
-                          items: _customers.map(
-                            (item) {
-                              return DropdownMenuItem(
-                                value: item,
-                                child: Text(item.name),
-                              );
-                            },
-                          ).toList(),
-                          validator: (value) =>
-                              value == null ? 'Campo obrigatório' : null,
-                          isExpanded: true,
-                        ),
-                        Row(
+                        return Future.value(true);
+                      },
+                      onChanged: () => _hasChanges = true,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: ListView(
                           children: [
-                            TextButton(
-                                onPressed: () {
-                                  showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime.now(),
-                                    lastDate:
-                                        DateTime.now().add(Duration(days: 365)),
-                                  ).then((value) {
-                                    if (value != null) {
-                                      _hasChanges = true;
-                                    }
-                                    setState(() {
-                                      _startDate = value!;
-                                    });
-                                  });
-                                },
-                                child: Icon(Icons.date_range)),
-                            Text('Data de Início: '),
-                            Text(dateFormat.format(_startDate))
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            TextButton(
-                                onPressed: () {
-                                  showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime.now(),
-                                    lastDate:
-                                        DateTime.now().add(Duration(days: 365)),
-                                  ).then((value) {
-                                    if (value != null) {
-                                      _hasChanges = true;
-                                    }
-                                    setState(() {
-                                      _deliveryDate = value!;
-                                    });
-                                  });
-                                },
-                                child: Icon(Icons.date_range)),
-                            Text('Data de Entrega: '),
-                            Text(dateFormat.format(_deliveryDate))
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: _isPayed,
+                            TextFormField(
+                              initialValue: (_data.containsKey('title'))
+                                  ? _data['title']
+                                  : '',
+                              keyboardType: TextInputType.text,
+                              decoration: InputDecoration(labelText: 'Titulo'),
+                              validator: (value) {
+                                if (value!.isEmpty) return 'Campo obrigatorio.';
+                              },
+                              onSaved: (value) => _data['title'] = value,
+                            ),
+                            TextFormField(
+                              initialValue: (_data.containsKey('description'))
+                                  ? _data['description']
+                                  : '',
+                              keyboardType: TextInputType.emailAddress,
+                              decoration:
+                                  InputDecoration(labelText: 'Descrição'),
+                              validator: (value) {
+                                if (value!.isEmpty) return 'Campo obrigatorio';
+                              },
+                              onSaved: (value) => _data['description'] = value,
+                            ),
+                            TextFormField(
+                              initialValue: (_data.containsKey('price'))
+                                  ? (numberFormat.format(_data['price']))
+                                  : '',
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(labelText: 'Preço'),
+                              validator: (value) {
+                                if (value!.isEmpty) return 'Campo obrigatorio';
+                              },
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                CurrencyInputFormatter()
+                              ],
+                              onSaved: (value) =>
+                                  _data['price'] = double.parse(value!),
+                            ),
+                            DropdownButtonFormField(
+                              value: _data['customer'],
+                              decoration: InputDecoration(labelText: 'Cliente'),
                               onChanged: (value) {
                                 _hasChanges = true;
                                 setState(() {
-                                  _isPayed = value as bool;
+                                  _data['customer'] = value as Customer;
                                 });
                               },
+                              items: _customers.map(
+                                (item) {
+                                  return DropdownMenuItem(
+                                    value: item,
+                                    child: Text(item.name),
+                                  );
+                                },
+                              ).toList(),
+                              validator: (value) =>
+                                  value == null ? 'Campo obrigatório' : null,
+                              isExpanded: true,
                             ),
-                            const Text(
-                              'Serviço Pago?',
-                              style: TextStyle(fontSize: 17),
-                            )
+                            Row(
+                              children: [
+                                TextButton(
+                                    onPressed: () {
+                                      showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime.now(),
+                                        lastDate: DateTime.now()
+                                            .add(Duration(days: 365)),
+                                      ).then((value) {
+                                        if (value != null) {
+                                          _hasChanges = true;
+                                        }
+                                        setState(() {
+                                          _startDate = value!;
+                                        });
+                                      });
+                                    },
+                                    child: Icon(Icons.date_range)),
+                                Text('Data de Início: '),
+                                Text(dateFormat.format(_startDate))
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                TextButton(
+                                    onPressed: () {
+                                      showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime.now(),
+                                        lastDate: DateTime.now()
+                                            .add(Duration(days: 365)),
+                                      ).then((value) {
+                                        if (value != null) {
+                                          _hasChanges = true;
+                                        }
+                                        setState(() {
+                                          _deliveryDate = value!;
+                                        });
+                                      });
+                                    },
+                                    child: Icon(Icons.date_range)),
+                                Text('Data de Entrega: '),
+                                Text(dateFormat.format(_deliveryDate))
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: _isPayed,
+                                  onChanged: (value) {
+                                    _hasChanges = true;
+                                    setState(() {
+                                      _isPayed = value as bool;
+                                    });
+                                  },
+                                ),
+                                const Text(
+                                  'Serviço Pago?',
+                                  style: TextStyle(fontSize: 17),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Container(
+                              height: 60,
+                              alignment: Alignment.centerLeft,
+                              decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(5),
+                                  )),
+                              child: SizedBox.expand(
+                                child: TextButton(
+                                  child: Text(
+                                    '${(_data['imageUrl'] == null) ? "Adicionar Imagem" : "Atualizar Imagem"}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  onPressed: () => getGallery(),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Container(
+                              height: 60,
+                              alignment: Alignment.centerLeft,
+                              decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(5),
+                                  )),
+                              child: SizedBox.expand(
+                                child: TextButton(
+                                  child: Text(
+                                    "Salvar",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    if (!_formkey.currentState!.validate())
+                                      return;
+                                    _formkey.currentState!.save();
+                                    _data['isPayed'] = _isPayed;
+                                    _data['deliveryDate'] = _deliveryDate;
+                                    _data['startDate'] = _startDate;
+                                    var order = retriveOrderModel();
+                                    setState(() {
+                                      _isSaving = true;
+                                    });
+                                    if (order.id == null) {
+                                      orderService.createNewOrder(
+                                          context, order);
+                                    } else {
+                                      orderService.updateOrder(context, order);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          height: 60,
-                          alignment: Alignment.centerLeft,
-                          decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(5),
-                              )),
-                          child: SizedBox.expand(
-                            child: TextButton(
-                              child: Text(
-                                '${(widget.order!.imageUrl == null || widget.order!.imageUrl!.isEmpty) ? "Adicionar Imagem" : "Atualizar Imagem"}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              onPressed: () => getGallery(),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        Container(
-                          height: 60,
-                          alignment: Alignment.centerLeft,
-                          decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(5),
-                              )),
-                          child: SizedBox.expand(
-                            child: TextButton(
-                              child: Text(
-                                "Salvar",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              onPressed: () {
-                                if (!_formkey.currentState!.validate()) return;
-                                _formkey.currentState!.save();
-                                _data['isPayed'] = _isPayed;
-                                _data['deliveryDate'] = _deliveryDate;
-                                _data['startDate'] = _startDate;
-                                var order = retriveOrderModel();
-                                if (order.id == null) {
-                                  orderService.createNewOrder(context, order);
-                                } else {
-                                  orderService.updateOrder(context, order);
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ));
+                      ));
             }));
   }
 
   getGallery() async {
-    var fileName = await ImagePicker().pickImage(source: ImageSource.gallery);
-    upload(fileName!);
+    var image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    _uploadImage(image!);
   }
 
-  upload(XFile imageFile) async {
-    var stream = http.ByteStream(Stream.castFrom(imageFile.openRead()));
-    var length = await imageFile.length();
-    var uri = Uri.parse(Constants.imageStoreUri);
+  _uploadImage(XFile image) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.get('token');
 
-    var request = http.MultipartRequest('POST', uri);
-    var multipartFile = http.MultipartFile('uploadedfile', stream, length,
-        filename: imageFile.path);
+    final request = http.MultipartRequest(
+        'POST', Uri.parse('${Constants.hostname}/bucket'));
 
-    request.files.add(multipartFile);
-    request.fields.addAll({'UPLOADCARE_PUB_KEY': '48e1ce64eb9cddbefe3a'});
-
+    request.files.add(await http.MultipartFile.fromPath("file", image.path));
+    request.headers.addAll({
+      'Content-type': 'multipart/form-data',
+      'Authorization': 'Bearer $token'
+    });
     var response = await request.send();
-    response.stream.transform(utf8.decoder).listen((event) {
-      final JsonDecoder decoder = JsonDecoder();
-      dynamic map = decoder.convert(event);
-
+    if (response.statusCode == 201) {
       setState(() {
-        _data['imageUrl'] = map['uploadedfile'];
+        _data['imageUrl'] = response.headers['location'];
         _hasChanges = true;
       });
-    });
+    }
   }
 
   Order retriveOrderModel() {

@@ -83,7 +83,7 @@ class _OrderTitleState extends State<OrderTitle> {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: CachedNetworkImage(
-          imageUrl: '${Constants.imageGetStore}/${widget.order.imageUrl}/',
+          imageUrl: widget.order.imageUrl!,
         ),
       );
     }

@@ -35,11 +35,19 @@ dependencies:
   flutter_slidable: ^0.6.0
   image_picker: any
   cached_network_image: any
+  syncfusion_flutter_charts: ^19.3.48
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_launcher_icons: ^0.9.2
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path_android: 'assets/icon/logo_size_invert.png'
+  image_path_ios: 'assets/icon/logo_size_invert.png'
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

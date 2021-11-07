@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:services_controll_app/models/order.model.dart';
 import 'package:services_controll_app/services/order.service.dart';
 import 'package:services_controll_app/widgets/order_title.dart';
@@ -9,6 +10,8 @@ class DelayedOrdersTab extends StatefulWidget {
 }
 
 class _DelayedOrdersTabState extends State<DelayedOrdersTab> {
+  final dateFormat = DateFormat('dd/MM/yyyy');
+
   @override
   Widget build(BuildContext context) {
     final OrderService orderService = OrderService();
@@ -28,7 +31,8 @@ class _DelayedOrdersTabState extends State<DelayedOrdersTab> {
         var allOrders = snapshot.data!;
         var delayedOrders = allOrders
             .where((order) => (order.status == 'OPEN' &&
-                order.deliveryDate.isBefore(DateTime.now())))
+                order.deliveryDate.isBefore(
+                    dateFormat.parse(dateFormat.format(DateTime.now())))))
             .toList();
         return ListView.builder(
             padding: EdgeInsets.all(8),

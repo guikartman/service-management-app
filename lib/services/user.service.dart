@@ -79,11 +79,7 @@ class UserService {
         headers: <String, String>{'Authorization': 'Bearer $token'});
 
     Navigator.of(context).build(context);
-    if (response.statusCode == 202) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text("O nome foi alterado!"),
-      ));
-    } else {
+    if (response.statusCode != 202) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text("Error ao alterar o nome!"),
       ));
@@ -112,15 +108,16 @@ class UserService {
     final response = await http.put(Uri.parse(uri),
         headers: <String, String>{'Authorization': 'Bearer $token'});
 
-    Navigator.of(context).pop();
     if (response.statusCode == 202) {
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text("Senha alterada com sucesso!"),
       ));
     } else {
+      Navigator.of(context).build(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text(
-            "Não foi possível alterar a senha, tente novamente mais tarde!"),
+            "Não foi possível alterar a senha, verifique se a senha atual está correta!"),
       ));
     }
   }

@@ -2,12 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:services_controll_app/models/order.model.dart';
+import 'package:services_controll_app/models/report.model.dart';
 import 'package:services_controll_app/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 List<Order> ordersFromJson(String str) =>
     List<Order>.from(json.decode(str).map((x) => Order.fromJson(x)));
+
+Report reportFromJson(String str) => Report.fromJson(json.decode(str));
 
 class OrderService {
   Future<List<Order>> getOrders() async {
@@ -25,6 +28,22 @@ class OrderService {
     } else {
       return List.empty();
     }
+  }
+
+  Future<Report> getReports() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final email = prefs.get('email');
+    final token = prefs.get('token');
+    final url = '${Constants.hostname}/orders/reports?email=$email';
+    var response = await http.get(Uri.parse(url), headers: <String, String>{
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json; charset=UTF-8'
+    });
+    var report;
+    if (response.statusCode == 200) {
+      report = reportFromJson(response.body);
+    }
+    return report;
   }
 
   Future createNewOrder(BuildContext context, Order order) async {
@@ -111,6 +130,25 @@ class OrderService {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
             "Error ao ${(status == 'COMPLETED') ? 'completar' : 'abrir'} serviço!"),
+      ));
+    }
+  }
+
+  Future updatePayedSatus(BuildContext context, int id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.get('token');
+    final url = '${Constants.hostname}/orders/payed-status/$id';
+    final response = await http.patch(Uri.parse(url),
+        headers: <String, String>{'Authorization': 'Bearer $token'});
+
+    Navigator.of(context).pushNamed('/');
+    if (response.statusCode == 204) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Status de pagamento do serviço atualizado com sucesso!"),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error ao atualizar status de pagamento do serviço!"),
       ));
     }
   }

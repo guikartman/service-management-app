@@ -12,7 +12,7 @@ class Menu extends StatelessWidget {
     return SizedBox(
       width: 150,
       child: Drawer(
-        child: Column(
+        child: ListView(
           children: [
             Container(
               height: 100,
@@ -28,11 +28,22 @@ class Menu extends StatelessWidget {
               height: 20,
               color: Colors.black,
             ),
+            SizedBox(
+              height: 15,
+            ),
             _MenuItem(
                 color: color,
                 title: 'Services',
                 icon: Icons.work,
                 onTap: () => onNavigate(context, '/')),
+            SizedBox(
+              height: 15,
+            ),
+            _MenuItem(
+                color: color,
+                title: 'Graficos',
+                icon: Icons.add_chart_rounded,
+                onTap: () => onNavigate(context, '/relatorios')),
             SizedBox(
               height: 15,
             ),
@@ -99,23 +110,20 @@ class _MenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Opacity(
-        opacity: 0.6,
-        child: Container(
-          height: 70,
-          alignment: Alignment.center,
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                color: color,
-                size: 40,
-              ),
-              Text(title,
-                  style: TextStyle(
-                      color: color, fontSize: 16, fontWeight: FontWeight.w700))
-            ],
-          ),
+      child: Container(
+        height: 70,
+        alignment: Alignment.center,
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 40,
+            ),
+            Text(title,
+                style: TextStyle(
+                    color: color, fontSize: 16, fontWeight: FontWeight.w700))
+          ],
         ),
       ),
     );

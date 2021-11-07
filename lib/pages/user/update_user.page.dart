@@ -40,6 +40,9 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                 _formKey.currentState!.save();
                 if (!_formKey.currentState!.validate()) return;
                 userService.updateUserName(context, _data['name']);
+                setState(() {
+                  _hasChanges = false;
+                });
               },
               icon: Icon(Icons.save))
         ],
