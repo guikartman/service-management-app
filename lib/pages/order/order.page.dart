@@ -25,7 +25,7 @@ class _OrderPageState extends State<OrderPage> {
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   final dateFormat = DateFormat('dd/MM/yyyy');
-  final numberFormat = NumberFormat("#,##0.00", "en_US");
+  final numberFormat = NumberFormat.currency(locale: 'pt_BR', symbol: '');
   late Map<String, dynamic> _data;
 
   late List<Customer> _customers;
@@ -189,8 +189,11 @@ class _OrderPageState extends State<OrderPage> {
                                 FilteringTextInputFormatter.digitsOnly,
                                 CurrencyInputFormatter()
                               ],
-                              onSaved: (value) =>
-                                  _data['price'] = double.parse(value!),
+                              onSaved: (value) {
+                                value = value!.replaceAll('.', '');
+                                value = value.replaceAll(',', '.');
+                                _data['price'] = double.parse(value);
+                              },
                             ),
                             DropdownButtonFormField(
                               value: _data['customer'],
@@ -220,9 +223,10 @@ class _OrderPageState extends State<OrderPage> {
                                       showDatePicker(
                                         context: context,
                                         initialDate: DateTime.now(),
-                                        firstDate: DateTime.now(),
+                                        firstDate: DateTime.now().subtract(
+                                            const Duration(days: 365)),
                                         lastDate: DateTime.now()
-                                            .add(Duration(days: 365)),
+                                            .add(const Duration(days: 365)),
                                       ).then((value) {
                                         if (value != null) {
                                           _hasChanges = true;
@@ -244,9 +248,10 @@ class _OrderPageState extends State<OrderPage> {
                                       showDatePicker(
                                         context: context,
                                         initialDate: DateTime.now(),
-                                        firstDate: DateTime.now(),
+                                        firstDate: DateTime.now().subtract(
+                                            const Duration(days: 365)),
                                         lastDate: DateTime.now()
-                                            .add(Duration(days: 365)),
+                                            .add(const Duration(days: 365)),
                                       ).then((value) {
                                         if (value != null) {
                                           _hasChanges = true;
