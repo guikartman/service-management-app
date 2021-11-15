@@ -41,7 +41,18 @@ class OrderService {
     });
     var report;
     if (response.statusCode == 200) {
-      report = reportFromJson(response.body);
+      try {
+        report = reportFromJson(response.body);
+      } catch (exception) {
+        report = Report(
+            totalCash: 0.0,
+            totalCashEarned: 0.0,
+            totalOrder: 0,
+            totalOrderCompleted: 0,
+            totalOrderDelayed: 0,
+            totalOrderInProgress: 0,
+            totalOrderOpen: 0);
+      }
     }
     return report;
   }

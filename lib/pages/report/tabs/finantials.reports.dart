@@ -12,7 +12,7 @@ class FinantialsPage extends StatefulWidget {
 
 class _FinantialsPageState extends State<FinantialsPage>
     with TickerProviderStateMixin {
-  var numberFormat = NumberFormat("###0.00#", "pt_BR");
+  final numberFormat = NumberFormat.simpleCurrency(locale: 'pt_BR');
 
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -39,22 +39,23 @@ class _FinantialsPageState extends State<FinantialsPage>
   }
 
   void _setHeightBalances(Report report) {
-    if (report.totalCash == 0) {
-      _earnedHeight = 0;
-      _pendingHeight = 0;
-      _earned = 0;
-      _pending = 0;
-    }
     var maxHeight = MediaQuery.of(context).size.height - 400;
     var wHeight = (report.totalCashEarned / report.totalCash) * maxHeight;
     var dHeight =
         ((report.totalCash - report.totalCashEarned) / report.totalCash) *
             maxHeight;
 
-    _earnedHeight = wHeight;
-    _pendingHeight = dHeight;
-    _earned = report.totalCashEarned;
-    _pending = (report.totalCash - report.totalCashEarned);
+    if (report.totalCash == 0.0) {
+      _earnedHeight = 0.0;
+      _pendingHeight = 0.0;
+      _earned = 0.0;
+      _pending = 0.0;
+    } else {
+      _earnedHeight = wHeight;
+      _pendingHeight = dHeight;
+      _earned = report.totalCashEarned;
+      _pending = (report.totalCash - report.totalCashEarned);
+    }
   }
 
   @override
@@ -86,7 +87,7 @@ class _FinantialsPageState extends State<FinantialsPage>
                   height: 100,
                   alignment: Alignment.center,
                   child: Text(
-                    'R\$${numberFormat.format(report.totalCash)}',
+                    '${numberFormat.format(report.totalCash)}',
                     style: TextStyle(color: Colors.white, fontSize: 40),
                   ),
                   decoration: BoxDecoration(
@@ -162,7 +163,7 @@ class _BarLine extends StatelessWidget {
           height: 3,
         ),
         Text(
-          'R\$ $amount',
+          '$amount',
           style: TextStyle(fontWeight: FontWeight.w500),
         ),
       ],

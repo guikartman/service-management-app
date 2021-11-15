@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:services_controll_app/models/order.model.dart';
 import 'package:services_controll_app/pages/customer/customer.page.dart';
 import 'package:services_controll_app/services/order.service.dart';
-import 'package:services_controll_app/utils/constants.dart';
 import 'package:services_controll_app/widgets/detail_image.dart';
 
 class OrderManagement extends StatefulWidget {
@@ -20,7 +19,7 @@ class _OrderManagementState extends State<OrderManagement> {
   @override
   Widget build(BuildContext context) {
     var dateFormater = DateFormat('dd/MM/yyyy');
-    var numberFormater = NumberFormat('###.00', 'en_US');
+    var numberFormater = NumberFormat.simpleCurrency(locale: 'pt_BR');
     var orderService = OrderService();
     return Scaffold(
       appBar: AppBar(
@@ -126,7 +125,7 @@ class _OrderManagementState extends State<OrderManagement> {
                 SizedBox(
                   height: 15,
                 ),
-                Text('Preço: R\$ ${numberFormater.format(widget.order.price)}',
+                Text('Preço: ${numberFormater.format(widget.order.price)}',
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
                 SizedBox(
